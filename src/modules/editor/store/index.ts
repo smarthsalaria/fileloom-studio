@@ -5,22 +5,21 @@ interface EditorState {
   pdfBytes: Uint8Array | null;
   pdfVersion: number;
   numPages: number;
-  
+
   // Virtual Order: Positive numbers = Original Page Index. 
-  // We will handle "Inserted Pages" later if needed, for now let's fix Rotation.
-  pageOrder: number[]; 
+  pageOrder: number[];
 
   // NEW: Track rotation per page (Visual Index -> Degrees)
   pageRotations: Record<number, number>;
 
   scale: number;
-  // Global view rotation (optional, usually 0)
-  rotation: number; 
-  
-  selectedPages: Set<number>; 
+  // Global view rotation
+  rotation: number;
+
+  selectedPages: Set<number>;
   viewMode: 'scroll' | 'single';
-  activePageIndex: number; 
-  isTextSelectMode: boolean; 
+  activePageIndex: number;
+  isTextSelectMode: boolean;
   isProcessing: boolean;
 
   // History
@@ -30,9 +29,9 @@ interface EditorState {
   // Actions
   setIsProcessing: (isBusy: boolean) => void;
   setPdf: (file: File, bytes: Uint8Array) => void;
-  updatePdfBytes: (bytes: Uint8Array, saveToHistory?: boolean) => void; 
+  updatePdfBytes: (bytes: Uint8Array, saveToHistory?: boolean) => void;
   setPageOrder: (newOrder: number[]) => void;
-  
+
   // NEW: Set rotation for specific pages
   setPageRotation: (pageIndex: number, angle: number) => void;
 
@@ -51,12 +50,15 @@ interface EditorState {
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
+  // ----------------------------------------------------------------
+  // INITIAL STATE
+  // ----------------------------------------------------------------
   pdfFile: null,
   pdfBytes: null,
   pdfVersion: 0,
   numPages: 0,
-  pageOrder: [], 
-  
+  pageOrder: [],
+
   // Initialize empty rotations
   pageRotations: {},
 
@@ -70,11 +72,14 @@ export const useEditorStore = create<EditorState>((set) => ({
   isTextSelectMode: false,
   isProcessing: false,
 
+  // ----------------------------------------------------------------
+  // ACTIONS
+  // ----------------------------------------------------------------
   setIsProcessing: (isBusy) => set({ isProcessing: isBusy }),
 
-  setPdf: (file, bytes) => set({ 
-    pdfFile: file, 
-    pdfBytes: bytes, 
+  setPdf: (file, bytes) => set({
+    pdfFile: file,
+    pdfBytes: bytes,
     pdfVersion: 0,
     selectedPages: new Set(),
     activePageIndex: 0,
@@ -82,31 +87,32 @@ export const useEditorStore = create<EditorState>((set) => ({
     historyIndex: 0,
     isTextSelectMode: false,
     pageOrder: [],
-    pageRotations: {}, // Reset rotations
+    pageRotations: {}, // Reset rotations on new file
     isProcessing: false
   }),
-  
+
   updatePdfBytes: (bytes, saveToHistory = true) => set((state) => {
-    const newHistory = saveToHistory 
-      ? [...state.history.slice(0, state.historyIndex + 1), bytes] 
+    const newHistory = saveToHistory
+      ? [...state.history.slice(0, state.historyIndex + 1), bytes]
       : state.history;
-    
-    return { 
+
+    return {
       pdfBytes: bytes,
-      pdfVersion: state.pdfVersion + 1, 
+      pdfVersion: state.pdfVersion + 1,
       history: newHistory,
       historyIndex: saveToHistory ? newHistory.length - 1 : state.historyIndex,
 
-      pageOrder: [], 
-      pageRotations: {}, // Reset rotations after commit
-      
+      // IMPORTANT: Reset order and rotations after a "hard" update (like delete/merge)
+      // because the page indices physically change in the new PDF bytes.
+      pageOrder: [],
+      pageRotations: {}, 
       selectedPages: new Set()
     };
   }),
 
   setPageOrder: (newOrder) => set({ pageOrder: newOrder }),
 
-  // NEW: Update rotation for a specific visual index
+  // Update rotation for a specific visual index
   setPageRotation: (index, angle) => set((state) => ({
     pageRotations: {
       ...state.pageRotations,
@@ -114,51 +120,56 @@ export const useEditorStore = create<EditorState>((set) => ({
     }
   })),
 
-  setNumPages: (n) => set((state) => ({ 
+  setNumPages: (n) => set((state) => ({
     numPages: n,
-    pageOrder: state.pageOrder.length === n ? state.pageOrder : Array.from({ length: n }, (_, i) => i)
+    // If pageOrder length matches new count, keep it; otherwise reset to 0..N
+    pageOrder: state.pageOrder.length === n 
+      ? state.pageOrder 
+      : Array.from({ length: n }, (_, i) => i)
   })),
 
-  // ... rest of selectors (undo, redo, etc) ...
   undo: () => set((state) => {
-      if (state.historyIndex <= 0) return state;
-      const newIndex = state.historyIndex - 1;
-      return {
-        pdfBytes: state.history[newIndex],
-        historyIndex: newIndex,
-        pdfVersion: state.pdfVersion + 1,
-        pageOrder: [],
-        pageRotations: {} 
-      };
-    }),
-  
-    redo: () => set((state) => {
-      if (state.historyIndex >= state.history.length - 1) return state;
-      const newIndex = state.historyIndex + 1;
-      return {
-        pdfBytes: state.history[newIndex],
-        historyIndex: newIndex,
-        pdfVersion: state.pdfVersion + 1,
-        pageOrder: [],
-        pageRotations: {}
-      };
-    }),
-  
-    setScale: (n) => set({ scale: n }),
-    setRotation: (n) => set({ rotation: n }),
-    togglePageSelection: (index, multi = false) => set((state) => {
-      const newSet = new Set(multi ? state.selectedPages : []);
-      if (newSet.has(index)) newSet.delete(index);
-      else newSet.add(index);
-      return { selectedPages: newSet, activePageIndex: index };
-    }),
-    selectAll: () => set((state) => {
-      const newSet = new Set();
-      for(let i=0; i<state.numPages; i++) newSet.add(i);
-      return { selectedPages: newSet };
-    }),
-    deselectAll: () => set({ selectedPages: new Set() }),
-    setViewMode: (mode) => set({ viewMode: mode }),
-    setActivePageIndex: (n) => set({ activePageIndex: n }),
-    toggleTextSelectMode: () => set((state) => ({ isTextSelectMode: !state.isTextSelectMode })),
+    if (state.historyIndex <= 0) return state;
+    const newIndex = state.historyIndex - 1;
+    return {
+      pdfBytes: state.history[newIndex],
+      historyIndex: newIndex,
+      pdfVersion: state.pdfVersion + 1,
+      pageOrder: [],
+      pageRotations: {}
+    };
+  }),
+
+  redo: () => set((state) => {
+    if (state.historyIndex >= state.history.length - 1) return state;
+    const newIndex = state.historyIndex + 1;
+    return {
+      pdfBytes: state.history[newIndex],
+      historyIndex: newIndex,
+      pdfVersion: state.pdfVersion + 1,
+      pageOrder: [],
+      pageRotations: {}
+    };
+  }),
+
+  setScale: (n) => set({ scale: n }),
+  setRotation: (n) => set({ rotation: n }),
+
+  togglePageSelection: (index, multi = false) => set((state) => {
+    const newSet = new Set(multi ? state.selectedPages : []);
+    if (newSet.has(index)) newSet.delete(index);
+    else newSet.add(index);
+    return { selectedPages: newSet, activePageIndex: index };
+  }),
+
+  selectAll: () => set((state) => {
+    const newSet = new Set<number>();
+    for (let i = 0; i < state.numPages; i++) newSet.add(i);
+    return { selectedPages: newSet };
+  }),
+
+  deselectAll: () => set({ selectedPages: new Set() }),
+  setViewMode: (mode) => set({ viewMode: mode }),
+  setActivePageIndex: (n) => set({ activePageIndex: n }),
+  toggleTextSelectMode: () => set((state) => ({ isTextSelectMode: !state.isTextSelectMode })),
 }));
