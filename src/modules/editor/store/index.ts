@@ -96,8 +96,11 @@ export const useEditorStore = create<EditorState>((set) => ({
       pdfVersion: state.pdfVersion + 1, 
       history: newHistory,
       historyIndex: saveToHistory ? newHistory.length - 1 : state.historyIndex,
+
       pageOrder: [], 
-      pageRotations: {} // Reset rotations after commit
+      pageRotations: {}, // Reset rotations after commit
+      
+      selectedPages: new Set()
     };
   }),
 

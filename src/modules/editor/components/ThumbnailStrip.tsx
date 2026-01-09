@@ -53,10 +53,14 @@ const SortableThumbnail = ({
       ref={setNodeRef}
       style={style}
       className={`
-        relative min-w-[70px] md:min-w-[80px] h-[90px] md:h-[100px] bg-white cursor-pointer transition-colors duration-200 flex items-center justify-center
+        relative min-w-[70px] md:min-w-[80px] h-[90px] md:h-[100px] 
+        bg-white dark:bg-slate-800 
+        cursor-pointer transition-colors duration-200 flex items-center justify-center
         border group select-none
-        ${active ? 'border-blue-500 ring-1 ring-blue-500 shadow-md z-10' : 'border-slate-300 hover:border-slate-400'}
-        ${selected ? 'bg-blue-50/50' : ''}
+        ${active 
+            ? 'border-blue-500 ring-1 ring-blue-500 shadow-md z-10' 
+            : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'}
+        ${selected ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}
       `}
       {...attributes}
       {...listeners}
@@ -70,7 +74,7 @@ const SortableThumbnail = ({
         <Checkbox 
           checked={selected}
           onCheckedChange={(checked) => onSelect(index, checked === true)}
-          className="h-5 w-5 bg-white/90 border-slate-400 data-[state=checked]:bg-blue-600 shadow-sm"
+          className="h-5 w-5 bg-white/90 dark:bg-slate-700/90 border-slate-400 dark:border-slate-500 data-[state=checked]:bg-blue-600 shadow-sm"
         />
       </div>
       {children}
@@ -85,7 +89,7 @@ export const ThumbnailStrip = () => {
   const { 
     pdfBytes, numPages, activePageIndex, setActivePageIndex, 
     selectedPages, togglePageSelection, selectAll, deselectAll, 
-    pdfVersion, pageOrder, pageRotations // <--- Get Rotations
+    pdfVersion, pageOrder, pageRotations
   } = useEditorStore();
   
   const { reorderPage } = usePdfActions();
@@ -150,42 +154,42 @@ export const ThumbnailStrip = () => {
   if (!localPdfData || localNumPages <= 1) return null;
 
   return (
-    <div className="w-full bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 flex flex-col shrink-0">
+    <div className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 flex flex-col shrink-0 transition-colors duration-300">
       
       {/* TOP BAR */}
-      <div className="flex items-center justify-between px-2 md:px-4 py-2 bg-slate-50 border-b gap-2">
+      <div className="flex items-center justify-between px-2 md:px-4 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 gap-2 transition-colors">
         
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Button variant="ghost" size="sm" onClick={selectAll} className="h-7 text-xs px-2 text-slate-600 hidden md:flex hover:bg-slate-100">
+          <Button variant="ghost" size="sm" onClick={selectAll} className="h-7 text-xs px-2 text-slate-600 dark:text-slate-400 hidden md:flex hover:bg-slate-100 dark:hover:bg-slate-800">
             <CheckSquare className="w-3 h-3 mr-1" /> All
           </Button>
-          <Button variant="ghost" size="sm" onClick={deselectAll} disabled={selectedPages.size === 0} className="h-7 text-xs px-2 text-slate-600 hidden md:flex hover:bg-slate-100">
+          <Button variant="ghost" size="sm" onClick={deselectAll} disabled={selectedPages.size === 0} className="h-7 text-xs px-2 text-slate-600 dark:text-slate-400 hidden md:flex hover:bg-slate-100 dark:hover:bg-slate-800">
             <XSquare className="w-3 h-3 mr-1" /> Clear
           </Button>
           {selectedPages.size > 0 && (
-             <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+             <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full whitespace-nowrap">
                {selectedPages.size} <span className="hidden sm:inline">selected</span>
              </span>
           )}
         </div>
 
         <div className="flex items-center justify-center gap-1 md:gap-2 flex-initial">
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setActivePageIndex(Math.max(0, activePageIndex - 1))} disabled={activePageIndex <= 0}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-slate-600 dark:text-slate-400 dark:hover:bg-slate-800" onClick={() => setActivePageIndex(Math.max(0, activePageIndex - 1))} disabled={activePageIndex <= 0}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           
-          <div className="flex items-center gap-1 text-sm font-medium text-slate-600 bg-white px-2 py-1 rounded border shadow-sm shrink-0">
+          <div className="flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
             <Input 
-              className="w-10 h-6 text-center p-0 border-0 focus-visible:ring-0 font-bold text-slate-800" 
+              className="w-10 h-6 text-center p-0 border-0 focus-visible:ring-0 font-bold text-slate-800 dark:text-slate-100 bg-transparent" 
               value={inputValue} 
               onChange={(e) => setInputValue(e.target.value)} 
               onBlur={commitPageChange} 
               onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()} 
             />
-            <span className="text-slate-400 text-xs whitespace-nowrap">/ {numPages}</span>
+            <span className="text-slate-400 dark:text-slate-500 text-xs whitespace-nowrap">/ {numPages}</span>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setActivePageIndex(Math.min(numPages - 1, activePageIndex + 1))} disabled={activePageIndex >= numPages - 1}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-slate-600 dark:text-slate-400 dark:hover:bg-slate-800" onClick={() => setActivePageIndex(Math.min(numPages - 1, activePageIndex + 1))} disabled={activePageIndex >= numPages - 1}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -194,16 +198,15 @@ export const ThumbnailStrip = () => {
       </div>
       
       {/* THUMBNAILS CONTAINER */}
-      <div className="h-28 md:h-32 overflow-x-auto flex items-center p-2 md:p-4 bg-slate-100/50 touch-pan-x">
+      <div className="h-28 md:h-32 overflow-x-auto flex items-center p-2 md:p-4 bg-slate-100/50 dark:bg-slate-950 touch-pan-x transition-colors">
          <Document file={localPdfData} className="flex gap-3 md:gap-4" onLoadSuccess={onDocumentLoadSuccess} loading={null}>
            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
              <SortableContext items={itemIds} strategy={horizontalListSortingStrategy}>
-               {pageOrder.map((originalPageIndex, visualIndex) => { // FIX: Added curly brace
+               {pageOrder.map((originalPageIndex, visualIndex) => { 
                  
-                 // FIX: Calculated rotation here
                  const itemRotation = (pageRotations[visualIndex] || 0) % 360;
                  
-                 return ( // FIX: Explicit return
+                 return (
                    <div 
                       key={`wrapper-${visualIndex}`}
                       ref={visualIndex === activePageIndex ? activeThumbRef : null}
@@ -221,7 +224,7 @@ export const ThumbnailStrip = () => {
                           <Page 
                             pageNumber={originalPageIndex + 1} 
                             width={80} 
-                            rotate={itemRotation} // <--- Applied Rotation
+                            rotate={itemRotation} 
                             renderTextLayer={false} 
                             renderAnnotationLayer={false} 
                           />

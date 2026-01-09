@@ -16,13 +16,13 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
   const { 
     numPages, setNumPages, 
     scale, 
-    rotation: globalRotation, // Rename global rotation to avoid conflict
-    pdfVersion, 
+    rotation: globalRotation, 
+    pdfVersion, // <--- We use this to force re-renders
     viewMode, activePageIndex, setActivePageIndex,
     selectedPages, togglePageSelection,
     isTextSelectMode,
     pageOrder,
-    pageRotations // <--- Get Virtual Rotations
+    pageRotations
   } = useEditorStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,21 +45,24 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
 
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    // If the active page was deleted and index is now out of bounds, fix it
     if (activePageIndex >= numPages) setActivePageIndex(Math.max(0, numPages - 1));
   };
 
   const safeVisualIndex = Math.min(Math.max(0, activePageIndex), Math.max(0, numPages - 1));
   const realPageNumber = (pageOrder[safeVisualIndex] ?? 0) + 1;
   
-  // Single View Rotation Calculation
   const singleViewRotation = (globalRotation + (pageRotations[safeVisualIndex] || 0)) % 360;
 
   return (
     <div 
       ref={containerRef} 
-      className="w-full h-full overflow-auto p-4 relative bg-slate-100/50"
+      className="w-full h-full overflow-auto p-4 relative bg-slate-100/50 dark:bg-slate-950 transition-colors duration-300"
     >
       <Document
+        // CRITICAL FIX: The key forces React to destroy and recreate this component 
+        // whenever the PDF version changes (e.g., after Save).
+        key={`main_doc_${pdfVersion}`} 
         file={pdfFile}
         onLoadSuccess={handleDocumentLoadSuccess}
         loading={null} 
@@ -68,7 +71,6 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
         {/* MODE 1: SCROLL VIEW */}
         {viewMode === 'scroll' && pageOrder.map((originalPageIndex, visualIndex) => {
           
-          // FIX: Calculate rotation inside the map function
           const itemRotation = (globalRotation + (pageRotations[visualIndex] || 0)) % 360;
 
           return (
@@ -78,7 +80,10 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
               onClick={(e) => handlePageClick(visualIndex, e)}
               className={`
                 mb-6 shadow-lg transition-all duration-200 cursor-pointer relative group mx-auto
-                ${selectedPages.has(visualIndex) ? 'ring-4 ring-blue-500 ring-offset-2' : 'hover:ring-2 hover:ring-slate-300'}
+                ${selectedPages.has(visualIndex) 
+                  ? 'ring-4 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' 
+                  : 'hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-700'
+                }
               `}
               style={{ width: pageWidth }}
             >
@@ -87,7 +92,7 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
               <LazyPage 
                 pageNumber={originalPageIndex + 1} 
                 width={pageWidth} 
-                rotation={itemRotation} // <--- Pass Calculated Rotation
+                rotation={itemRotation} 
                 scale={1.0} 
               />
             </div>
@@ -104,7 +109,7 @@ export const MainViewer = ({ pdfFile }: MainViewerProps) => {
               key={`page_single_${safeVisualIndex}_${singleViewRotation}`} 
               pageNumber={realPageNumber} 
               width={pageWidth} 
-              rotate={singleViewRotation} // <--- Pass Calculated Rotation
+              rotate={singleViewRotation} 
               scale={1.0} 
               renderTextLayer={isTextSelectMode} 
               renderAnnotationLayer={isTextSelectMode} 
