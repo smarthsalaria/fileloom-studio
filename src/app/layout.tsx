@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script"; // Import Script for AdSense
+import Script from "next/script"; 
+// @ts-ignore
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// --- GLOBAL STYLES ---
-// Ensures PDF styles are loaded globally
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+// @ts-ignore
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+// @ts-ignore
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import { PrivacyDialog } from "@/components/privacy-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +22,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PDF Studio",
-  description: "Client-side PDF Editor",
+  title: "FileLoom Studio",
+  description: "Client-side PDF Editor - Edit PDFs directly in your browser without uploading to any server.",
 };
 
 export default function RootLayout({
@@ -42,6 +44,7 @@ export default function RootLayout({
           strategy="lazyOnload"
         /> 
         */}
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="915110e1-b168-4f6b-8344-7d00c068841b"></script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -54,6 +57,8 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        
+        
       </body>
     </html>
   );

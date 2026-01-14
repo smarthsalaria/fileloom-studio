@@ -111,7 +111,7 @@ export const PdfUploader = () => {
         <div className="grid grid-cols-2 gap-4 pt-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 justify-center transition-colors">
              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-             100% Client-Side Privacy
+             99.9% Privacy Client-Side Processing (Added Umami Cloud for Analytics)
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 justify-center transition-colors">
              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />

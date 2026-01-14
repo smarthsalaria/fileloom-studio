@@ -20,8 +20,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+//@ts-ignore
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+//@ts-ignore
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 // --- Sub-Component: Sortable Thumbnail ---
 interface SortableThumbnailProps {
@@ -74,7 +76,7 @@ const SortableThumbnail = ({
         <Checkbox 
           checked={selected}
           onCheckedChange={(checked) => onSelect(index, checked === true)}
-          className="h-5 w-5 bg-white/90 dark:bg-slate-700/90 border-slate-400 dark:border-slate-500 data-[state=checked]:bg-blue-600 shadow-sm"
+          className="h-5 w-5 cursor-pointer bg-white/90 dark:bg-slate-700/90 border-slate-400 dark:border-slate-500 data-[state=checked]:bg-blue-600 shadow-sm"
         />
       </div>
       {children}

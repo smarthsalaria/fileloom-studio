@@ -107,7 +107,7 @@ export const EditorSidebar = ({ isOpen }: { isOpen: boolean }) => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-7 w-7 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" 
+              className="h-7 w-7 cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" 
               onClick={undo} 
               disabled={historyIndex <= 0} 
               title="Undo"
@@ -117,7 +117,7 @@ export const EditorSidebar = ({ isOpen }: { isOpen: boolean }) => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-7 w-7 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" 
+              className="h-7 w-7 cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" 
               onClick={redo} 
               disabled={historyIndex >= history.length - 1} 
               title="Redo"
@@ -156,8 +156,8 @@ export const EditorSidebar = ({ isOpen }: { isOpen: boolean }) => {
                     className={`
                       w-full justify-start h-9 transition-colors
                       ${tool.id === 'delete' 
-                        ? 'text-slate-600 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400' 
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+                        ? 'text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400' 
+                        : 'text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                       }
                     `} 
                     onClick={tool.action}
